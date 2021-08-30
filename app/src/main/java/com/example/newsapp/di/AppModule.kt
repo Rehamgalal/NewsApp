@@ -17,11 +17,10 @@ class AppModule {
     @Singleton
     @Provides
     fun getRetrofitInstance():Retrofit {
-        val retrofit = Retrofit.Builder()
+        return Retrofit.Builder()
             .baseUrl(Constants.BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-        return retrofit
     }
 
     @Singleton
