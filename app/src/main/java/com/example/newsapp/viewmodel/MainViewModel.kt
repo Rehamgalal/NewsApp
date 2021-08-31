@@ -1,17 +1,19 @@
 package com.example.newsapp.viewmodel
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import android.content.SharedPreferences
+import androidx.annotation.NonNull
+import androidx.lifecycle.*
+import com.example.newsapp.NewsApp
 import com.example.newsapp.api.NewsApi
 import com.example.newsapp.model.NewsResponse
+import com.example.newsapp.model.datasource.NewsDataSource
 import com.example.newsapp.utils.NetworkState
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
-class MainViewModel @Inject constructor(val mService: NewsApi) : ViewModel() {
+class MainViewModel(@NonNull application: Application)  : AndroidViewModel(application) {
 
     private var searchResult: LiveData<NewsResponse>
     private var searchKey:MutableLiveData<String> = MutableLiveData()
@@ -19,11 +21,20 @@ class MainViewModel @Inject constructor(val mService: NewsApi) : ViewModel() {
     private val compositeDisposable = CompositeDisposable()
     private  var networkState:MutableLiveData<NetworkState> = MutableLiveData()
 
-    init {
-        searchResult = Transformations.switchMap(searchKey) {input ->
-            makeApiCall("eg","entertainment",input)
-        }
 
+    @Inject
+    lateinit var mService:NewsApi
+
+    @Inject
+    lateinit var mSharedPreferences: SharedPreferences
+
+    init {
+        val country:String? = mSharedPreferences.getString("country","")
+        val category:String? = mSharedPreferences.getString("category","")
+        (application as NewsApp).getAppComponent().inject(this)
+        searchResult = Transformations.switchMap(searchKey) {input ->
+            makeApiCall(country!!,category!!,input)
+        }
     }
     fun getRecyclerListObserver(): LiveData<NewsResponse> {
         return searchResult;
