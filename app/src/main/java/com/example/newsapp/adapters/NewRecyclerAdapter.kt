@@ -1,5 +1,6 @@
 package com.example.newsapp.adapters
 
+import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -86,7 +87,17 @@ class NewRecyclerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                     .load(article.urlToImage)
                     .placeholder(R.drawable.placeholder)
                     .into(itemView.image_view)
-            itemView.description.text = article.description
+            val description: String = if (article.description != null) {
+                Html.fromHtml(article.description,
+                        Html.FROM_HTML_MODE_LEGACY, null, { opening, tag, output, _ ->
+                    if (tag.equals("ul") && !opening) output.append("")
+                    if (tag.equals("li") && opening) output.append("")
+                    if (tag.equals("p") && opening) output.append("")
+                }).toString()
+            } else {
+                ""
+            }
+            itemView.description.text = description
             if (article.publishedAt != null) {
                 itemView.date.text = article.publishedAt.replace("T", itemView.context.resources.getString(R.string.at)).replace("Z", "")
             }

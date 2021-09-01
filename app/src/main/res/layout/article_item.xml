@@ -15,16 +15,18 @@
         android:weightSum="1">
         <ImageView
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
+            app:layout_constraintHeight_percent="0.4"
             android:id="@+id/image_view"
-            app:layout_constraintWidth_percent="0.25"
+            app:layout_constraintWidth_percent="0.4"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/title"
             app:layout_constraintBottom_toBottomOf="parent"
             android:contentDescription="@string/image_des" />
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            app:layout_constraintWidth_percent="0.85"
             android:gravity="center"
             android:textStyle="bold"
             android:textColor="@color/black"
@@ -33,7 +35,7 @@
             android:layout_gravity="center"
             android:id="@+id/title"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toEndOf="@id/image_view"
+            app:layout_constraintStart_toStartOf="parent"
             />
         <TextView
             android:layout_width="wrap_content"
@@ -47,7 +49,7 @@
             />
         <TextView
             android:layout_width="0dp"
-            app:layout_constraintWidth_percent="0.6"
+            app:layout_constraintWidth_percent="0.5"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:textSize="12sp"
@@ -55,6 +57,7 @@
             android:layout_margin="10dp"
             android:layout_gravity="center"
             android:id="@+id/description"
+            app:layout_constraintBottom_toTopOf="@id/source"
             app:layout_constraintTop_toBottomOf="@id/date"
             app:layout_constraintStart_toEndOf="@id/image_view"
             />
@@ -65,19 +68,19 @@
             android:textSize="12sp"
             android:layout_gravity="center"
             android:id="@+id/source"
-            app:layout_constraintTop_toBottomOf="@id/description"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@id/image_view"
             />
         <ImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
             android:id="@+id/like"
             android:src="@drawable/like"
             android:layout_margin="5dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/description"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/title"
+            app:layout_constraintStart_toEndOf="@id/title"
+            app:layout_constraintTop_toTopOf="@id/title"
+            app:layout_constraintBottom_toBottomOf="@id/title"
             android:contentDescription="@string/image_des" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
