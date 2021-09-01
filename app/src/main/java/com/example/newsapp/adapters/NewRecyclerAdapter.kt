@@ -8,8 +8,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.newsapp.R
 import com.example.newsapp.db.ArticleEntity
-import com.example.newsapp.model.Article
 import com.example.newsapp.utils.NetworkState
+import com.example.newsapp.utils.OnArticleLikedListener
 import com.example.newsapp.utils.OnClickListener
 import com.example.newsapp.utils.Status
 import kotlinx.android.synthetic.main.article_item.view.*
@@ -20,6 +20,7 @@ class NewRecyclerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private var networkState: NetworkState? = null
     private var articles: List<ArticleEntity>? = null
     private lateinit var listener: OnClickListener
+    private lateinit var likeListener: OnArticleLikedListener
     fun setDataList(articleList: List<ArticleEntity>) {
         this.articles = articleList
     }
@@ -28,13 +29,14 @@ class NewRecyclerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         this.networkState = networkState
     }
 
-    fun setListener(listener: OnClickListener) {
+    fun setListener(listener: OnClickListener, listenerLike: OnArticleLikedListener) {
         this.listener = listener
+        this.likeListener = listenerLike
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
-            R.layout.article_item -> ArticleItemViewHolder.create(parent, listener)
+            R.layout.article_item -> ArticleItemViewHolder.create(parent, listener,likeListener)
             R.layout.networkstate_item -> NetworkStateViewHolder.create(parent)
             else -> throw IllegalArgumentException("Unknown view type")
         }
@@ -48,12 +50,16 @@ class NewRecyclerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     override fun getItemCount(): Int {
-        return if (articles != null) {
-            articles!!.size
-        } else if (networkState != null) {
-            1
-        } else {
-            0
+        return when {
+            articles != null -> {
+                articles!!.size
+            }
+            networkState != null -> {
+                1
+            }
+            else -> {
+                0
+            }
         }
     }
 
@@ -71,24 +77,40 @@ class NewRecyclerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         return networkState != null && networkState != NetworkState.LOADED
     }
 
-    class ArticleItemViewHolder(view: View, private val listener: OnClickListener) :
-        RecyclerView.ViewHolder(view) {
+    class ArticleItemViewHolder(view: View, private val listener: OnClickListener, private val likeListener: OnArticleLikedListener) :
+            RecyclerView.ViewHolder(view) {
         fun bind(article: ArticleEntity) {
-            itemView.text_view.text = article.title
+
+            itemView.title.text = article.title
             Glide.with(itemView.context)
-                .load(article.urlToImage)
-                .placeholder(R.drawable.placeholder)
-                .into(itemView.image_view)
+                    .load(article.urlToImage)
+                    .placeholder(R.drawable.placeholder)
+                    .into(itemView.image_view)
+            itemView.description.text = article.description
+            if (article.publishedAt!=null) {
+                itemView.date.text = article.publishedAt.replace("T", itemView.context.resources.getString(R.string.at)).replace("Z", "")
+            }
+            itemView.source.text = article.source?.name
             itemView.setOnClickListener {
                 listener.onArticleCLicked(article)
+            }
+            itemView.like.setOnClickListener {
+                likeListener.onArticleLiked(article)
+                if (article.fav == 0) {
+                    article.fav = 1
+                    itemView.like.setImageResource(R.drawable.liked)
+                } else {
+                    article.fav = 0
+                    itemView.like.setImageResource(R.drawable.like)
+                }
             }
         }
 
         companion object {
-            fun create(parent: ViewGroup, listener: OnClickListener): ArticleItemViewHolder {
+            fun create(parent: ViewGroup, listener: OnClickListener, likeListenr: OnArticleLikedListener): ArticleItemViewHolder {
                 val layoutInflater = LayoutInflater.from(parent.context)
                 val view = layoutInflater.inflate(R.layout.article_item, parent, false)
-                return ArticleItemViewHolder(view, listener)
+                return ArticleItemViewHolder(view, listener,likeListenr)
             }
         }
     }
@@ -112,4 +134,6 @@ class NewRecyclerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             }
         }
     }
+
+
 }

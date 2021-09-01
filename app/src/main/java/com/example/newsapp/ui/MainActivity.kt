@@ -1,68 +1,87 @@
 package com.example.newsapp.ui
 
-import android.content.Intent
+import com.example.newsapp.adapters.NewRecyclerAdapter
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
+import android.view.MenuItem
+import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.newsapp.NewsApp
 import com.example.newsapp.R
-import com.example.newsapp.adapters.NewRecyclerAdapter
 import com.example.newsapp.db.ArticleEntity
-import com.example.newsapp.db.ArticlesDatabase
+import com.example.newsapp.utils.OnArticleLikedListener
 import com.example.newsapp.utils.OnClickListener
 import com.example.newsapp.viewmodel.MainViewModel
 import kotlinx.android.synthetic.main.activity_main.*
-import javax.inject.Inject
 
-class MainActivity : AppCompatActivity() , OnClickListener{
+class MainActivity : AppCompatActivity() , OnClickListener, OnArticleLikedListener {
 
     private lateinit var recyclerAdapter: NewRecyclerAdapter
-    private val viewModel:MainViewModel by viewModels()
-
-    @Inject
-    lateinit var dataBase: ArticlesDatabase
-
+    private val viewModel: MainViewModel by viewModels()
+    private var showingFav = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        (application as NewsApp).getAppComponent().inject(this)
         initRecyclerView()
         getData()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-         menuInflater.inflate(R.menu.menu,menu)
-        val menuItem = menu?.findItem(R.id.search)
-        val searchView = menuItem?.actionView as SearchView
-        searchView.queryHint = resources.getString(R.string.search)
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener{
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                viewModel.setFilter(query)
-                return false
-            }
+        menuInflater.inflate(R.menu.menu, menu)
 
-            override fun onQueryTextChange(newText: String?): Boolean {
-                viewModel.setFilter(newText)
-                return false
-            }
-
-        })
-        return true
+        return super.onCreateOptionsMenu(menu)
     }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId) {
+            R.id.search -> {
+                val searchView = item.actionView as SearchView
+                searchView.queryHint = resources.getString(R.string.search)
+                searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                    override fun onQueryTextSubmit(query: String?): Boolean {
+                        viewModel.setFilter(query)
+                        return false
+                    }
+
+                    override fun onQueryTextChange(newText: String?): Boolean {
+                        viewModel.setFilter(newText)
+                        return false
+                    }
+
+                })
+            }
+            R.id.like -> {
+                if (showingFav) {
+                item.setIcon(R.drawable.like)
+                    viewModel.setFilter("")
+                    showingFav = false
+                }
+                else {
+                    showingFav = true
+                    item.setIcon(R.drawable.liked)
+                    viewModel.getLikedArticles().observe(this,{
+                        if (showingFav){
+                        recyclerAdapter.setDataList(it)
+                        recyclerAdapter.notifyDataSetChanged()}
+                    })
+                }
+            }
+        }
+        return true
+    }
     private fun initRecyclerView() {
         recycler_view.layoutManager = LinearLayoutManager(this)
         recyclerAdapter = NewRecyclerAdapter()
-        recyclerAdapter.setListener(this)
+        recyclerAdapter.setListener(this, this)
         recycler_view.adapter = recyclerAdapter
     }
 
     private fun getData() {
-         viewModel.setFilter("")
+        viewModel.setFilter("")
         viewModel.getRecyclerListObserver().observe(this, {
             recyclerAdapter.setDataList(it)
             recyclerAdapter.notifyDataSetChanged()
@@ -74,9 +93,18 @@ class MainActivity : AppCompatActivity() , OnClickListener{
     }
 
     override fun onArticleCLicked(article: ArticleEntity) {
-        val intent = Intent(this, DetailsActivity::class.java)
-        intent.putExtra("article",article)
-        startActivity(intent)
+        webView.visibility = View.VISIBLE
+        webView.loadUrl(article.url)
+
     }
 
+    override fun onArticleLiked(article: ArticleEntity) {
+        viewModel.updateItem(article)
+    }
+
+    override fun onBackPressed() {
+        if (webView.isVisible) {
+            webView.visibility = View.GONE
+        }
+    }
 }

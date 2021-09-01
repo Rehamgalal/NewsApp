@@ -39,4 +39,4 @@ data class Article(
     }
 }
 fun Article.toArticleEntity() =
-    ArticleEntity(0,author, content,description,publishedAt,source,title,url!!,urlToImage)
+    ArticleEntity(0,author, content,description,publishedAt,source,title,url!!,urlToImage,0)

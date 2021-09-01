@@ -17,5 +17,6 @@ data class ArticleEntity(
     val source: Source?,
     val title: String?,
     @PrimaryKey val url: String,
-    val urlToImage: String?
+    val urlToImage: String?,
+    var fav:Int
     ): Parcelable
