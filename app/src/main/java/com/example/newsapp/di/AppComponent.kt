@@ -1,6 +1,8 @@
 package com.example.newsapp.di
 
 import android.app.Application
+import com.example.newsapp.ui.MainActivity
+import com.example.newsapp.ui.OnboardingActivity
 import com.example.newsapp.viewmodel.MainViewModel
 import dagger.Component
 import javax.inject.Singleton
@@ -9,5 +11,6 @@ import javax.inject.Singleton
 @Component(modules = [AppModule::class])
 interface AppComponent {
     fun inject(mainViewModel: MainViewModel)
-    fun inject(application: Application)
+    fun inject(onboardingActivity: OnboardingActivity)
+    fun inject(mainActivity: MainActivity)
 }

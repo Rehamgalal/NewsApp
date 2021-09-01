@@ -6,8 +6,9 @@ import androidx.annotation.NonNull
 import androidx.lifecycle.*
 import com.example.newsapp.NewsApp
 import com.example.newsapp.api.NewsApi
-import com.example.newsapp.model.NewsResponse
-import com.example.newsapp.model.datasource.NewsDataSource
+import com.example.newsapp.db.ArticleEntity
+import com.example.newsapp.db.ArticlesDatabase
+import com.example.newsapp.model.toArticleEntity
 import com.example.newsapp.utils.NetworkState
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -15,9 +16,9 @@ import javax.inject.Inject
 
 class MainViewModel(@NonNull application: Application)  : AndroidViewModel(application) {
 
-    private var searchResult: LiveData<NewsResponse>
+    private var searchResult: LiveData<List<ArticleEntity>>
     private var searchKey:MutableLiveData<String> = MutableLiveData()
-    private  var liveDataList: MutableLiveData<NewsResponse> = MutableLiveData()
+    private  var liveDataList: MutableLiveData<List<ArticleEntity>> = MutableLiveData()
     private val compositeDisposable = CompositeDisposable()
     private  var networkState:MutableLiveData<NetworkState> = MutableLiveData()
 
@@ -28,28 +29,40 @@ class MainViewModel(@NonNull application: Application)  : AndroidViewModel(appli
     @Inject
     lateinit var mSharedPreferences: SharedPreferences
 
+    @Inject
+    lateinit var dataBase:ArticlesDatabase
     init {
-        val country:String? = mSharedPreferences.getString("country","")
-        val category:String? = mSharedPreferences.getString("category","")
         (application as NewsApp).getAppComponent().inject(this)
+        val country:String? = mSharedPreferences.getString("country","")
+        val category1:String? = mSharedPreferences.getString("category1","")
+        val category2:String? = mSharedPreferences.getString("category2","")
+        val category3:String? = mSharedPreferences.getString("category3","")
+
         searchResult = Transformations.switchMap(searchKey) {input ->
-            makeApiCall(country!!,category!!,input)
+            this.makeApiCall(country!!,category1!!,input)
+            this.makeApiCall(country,category2!!,input)
+            this.makeApiCall(country,category3!!,input)
         }
     }
-    fun getRecyclerListObserver(): LiveData<NewsResponse> {
-        return searchResult;
+    fun getRecyclerListObserver(): LiveData<List<ArticleEntity>> {
+        return searchResult
     }
 
-    private fun makeApiCall(country:String, category:String, searchKey:String = ""): MutableLiveData<NewsResponse> {
-        networkState.postValue(NetworkState.LOADING)
+    private fun makeApiCall(country:String, category:String, searchKey:String = ""): MutableLiveData<List<ArticleEntity>> {
+        this.networkState.postValue(NetworkState.LOADING)
         compositeDisposable.add(
-            mService.getArticles(country,category,searchKey).subscribeOn(Schedulers.io())
+            mService.getArticles(country,category,searchKey).map { newsResponse ->
+                newsResponse.articles.map { it.toArticleEntity() }
+            }.doOnSuccess {
+                dataBase.articlesDao().insert(it)
+            }.subscribeOn(Schedulers.io())
                 .subscribe(
                     {
+                    liveDataList.postValue(dataBase.articlesDao().allArticlesEntities())
                     networkState.postValue(NetworkState.LOADED)
-                        liveDataList.postValue(it)
                     },{
                       networkState.postValue(NetworkState.error(it.message))
+                      liveDataList.postValue(dataBase.articlesDao().allArticlesEntities())
                     }
                 )
 
@@ -57,8 +70,8 @@ class MainViewModel(@NonNull application: Application)  : AndroidViewModel(appli
         return liveDataList
     }
 
-    fun setFilter(filter:String) {
-        searchKey.value = filter
+    fun setFilter(filter:String?) {
+        if (filter == null) searchKey.value =  "" else searchKey.value = filter
     }
     fun getNetworkState(): LiveData<NetworkState>{
         return networkState

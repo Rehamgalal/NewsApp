@@ -3,89 +3,100 @@ package com.example.newsapp.adapters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.newsapp.R
+import com.example.newsapp.db.ArticleEntity
 import com.example.newsapp.model.Article
 import com.example.newsapp.utils.NetworkState
 import com.example.newsapp.utils.OnClickListener
+import com.example.newsapp.utils.Status
 import kotlinx.android.synthetic.main.article_item.view.*
 import kotlinx.android.synthetic.main.networkstate_item.view.*
 
 class NewRecyclerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private  var networkState:NetworkState?=null
-    private  var articles: List<Article> ? =null
+    private var networkState: NetworkState? = null
+    private var articles: List<ArticleEntity>? = null
     private lateinit var listener: OnClickListener
-     fun setDataList(articleList: List<Article>) {
+    fun setDataList(articleList: List<ArticleEntity>) {
         this.articles = articleList
     }
 
-     fun setNetworkState(networkState: NetworkState) {
+    fun setNetworkState(networkState: NetworkState) {
         this.networkState = networkState
     }
 
-    fun setListener(listener: OnClickListener){
+    fun setListener(listener: OnClickListener) {
         this.listener = listener
     }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        return when(viewType) {
-            R.layout.article_item -> ArticleItemViewHolder.create(parent,listener)
+        return when (viewType) {
+            R.layout.article_item -> ArticleItemViewHolder.create(parent, listener)
             R.layout.networkstate_item -> NetworkStateViewHolder.create(parent)
             else -> throw IllegalArgumentException("Unknown view type")
         }
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        when(getItemViewType(position)){
+        when (getItemViewType(position)) {
             R.layout.article_item -> (holder as ArticleItemViewHolder).bind(articles!![position])
             R.layout.networkstate_item -> (holder as NetworkStateViewHolder).bind(networkState!!)
         }
     }
 
     override fun getItemCount(): Int {
-        return if(articles!=null) {
+        return if (articles != null) {
             articles!!.size
+        } else if (networkState != null) {
+            1
         } else {
             0
         }
     }
 
+
     override fun getItemViewType(position: Int): Int {
-        return if (hasExtraRow() && position == itemCount-1) {
+        return if (hasExtraRow() && position == itemCount - 1) {
             R.layout.networkstate_item
-        }else{
+        } else {
             R.layout.article_item
         }
 
     }
 
-    private fun hasExtraRow(): Boolean{
-        return networkState !=null && networkState != NetworkState.LOADED
+    private fun hasExtraRow(): Boolean {
+        return networkState != null && networkState != NetworkState.LOADED
     }
-    class ArticleItemViewHolder(view: View, private val listener: OnClickListener): RecyclerView.ViewHolder(view) {
-        fun bind(article:Article) {
+
+    class ArticleItemViewHolder(view: View, private val listener: OnClickListener) :
+        RecyclerView.ViewHolder(view) {
+        fun bind(article: ArticleEntity) {
             itemView.text_view.text = article.title
             Glide.with(itemView.context)
                 .load(article.urlToImage)
                 .placeholder(R.drawable.placeholder)
                 .into(itemView.image_view)
-            itemView.setOnClickListener{
+            itemView.setOnClickListener {
                 listener.onArticleCLicked(article)
             }
         }
+
         companion object {
             fun create(parent: ViewGroup, listener: OnClickListener): ArticleItemViewHolder {
                 val layoutInflater = LayoutInflater.from(parent.context)
-                val view = layoutInflater.inflate(R.layout.article_item,parent,false)
+                val view = layoutInflater.inflate(R.layout.article_item, parent, false)
                 return ArticleItemViewHolder(view, listener)
             }
         }
     }
 
-    class NetworkStateViewHolder(view: View): RecyclerView.ViewHolder(view) {
+    class NetworkStateViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         fun bind(networkState: NetworkState) {
-            if (networkState.message!=null) {
+            itemView.progress_bar.isVisible = networkState.status == Status.LOADING
+            if (networkState.message != null) {
                 itemView.error_txt.visibility = View.VISIBLE
                 itemView.error_txt.text = networkState.message
             } else {
@@ -96,7 +107,7 @@ class NewRecyclerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         companion object {
             fun create(parent: ViewGroup): NetworkStateViewHolder {
                 val layoutInflater = LayoutInflater.from(parent.context)
-                val view = layoutInflater.inflate(R.layout.networkstate_item, parent,false)
+                val view = layoutInflater.inflate(R.layout.networkstate_item, parent, false)
                 return NetworkStateViewHolder(view)
             }
         }

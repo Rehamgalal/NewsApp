@@ -1,9 +1,11 @@
 package com.example.newsapp.di
 
 import android.app.Application
+import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import com.example.newsapp.api.NewsApi
+import com.example.newsapp.db.ArticlesDatabase
 import com.example.newsapp.other.Constants
 import dagger.Module
 import dagger.Provides
@@ -16,7 +18,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 @Module
-class AppModule {
+class AppModule(val application: Application) {
 
     @Singleton
     @Provides
@@ -32,12 +34,11 @@ class AppModule {
     @Singleton
     @Provides
     fun provideOKHttpClient():OkHttpClient {
-        val requestInterceptor = Interceptor {
-            chain ->
+        val requestInterceptor = Interceptor { chain ->
             val url = chain.request()
                 .url
                 .newBuilder()
-                .addQueryParameter("apiKey",Constants.API_KEY)
+                .addQueryParameter("apiKey", Constants.API_KEY)
                 .build()
             val request = chain.request()
                 .newBuilder()
@@ -47,7 +48,7 @@ class AppModule {
         }
         return OkHttpClient.Builder()
             .addInterceptor(requestInterceptor)
-            .connectTimeout(60,TimeUnit.SECONDS)
+            .connectTimeout(60, TimeUnit.SECONDS)
             .build()
     }
 
@@ -57,9 +58,16 @@ class AppModule {
         return retrofit.create(NewsApi::class.java)
     }
 
+
     @Singleton
     @Provides
-    fun getSharedPrefrences(application: Application):SharedPreferences{
+    fun getSharedPrefrences():SharedPreferences{
         return application.getSharedPreferences("userSelection", MODE_PRIVATE)
     }
+
+    @Singleton
+    @Provides
+    fun providesArticlesDatabase(): ArticlesDatabase {
+       return ArticlesDatabase.buildDatabase(application.applicationContext)}
+
 }

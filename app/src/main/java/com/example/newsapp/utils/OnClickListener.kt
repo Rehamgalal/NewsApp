@@ -1,7 +1,7 @@
 package com.example.newsapp.utils
 
-import com.example.newsapp.model.Article
+import com.example.newsapp.db.ArticleEntity
 
 interface OnClickListener {
-    fun onArticleCLicked(article: Article)
+    fun onArticleCLicked(article: ArticleEntity)
 }
