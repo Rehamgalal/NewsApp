@@ -17,7 +17,7 @@ abstract class ArticlesDatabase : RoomDatabase() {
     companion object {
         fun buildDatabase(context: Context): ArticlesDatabase {
             return Room.databaseBuilder(context, ArticlesDatabase::class.java, DATABASE_NAME)
-                .build()
+                    .build()
         }
     }
 }

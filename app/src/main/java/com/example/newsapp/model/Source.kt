@@ -5,18 +5,17 @@ import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 data class Source(
-    val id: String?,
-    val name: String?
-):Parcelable
-{
+        val id: String?,
+        val name: String?
+) : Parcelable {
     companion object {
         operator fun invoke(
-            id: Int? =null ,
-            name: String? =null,
+                id: Int? = null,
+                name: String? = null,
         ): Source {
             return Source(
-                id ?: 0,
-                name ?: "",
+                    id ?: 0,
+                    name ?: "",
             )
         }
     }

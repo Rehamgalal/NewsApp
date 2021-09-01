@@ -17,7 +17,7 @@ import com.example.newsapp.utils.OnClickListener
 import com.example.newsapp.viewmodel.MainViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : AppCompatActivity() , OnClickListener, OnArticleLikedListener {
+class MainActivity : AppCompatActivity(), OnClickListener, OnArticleLikedListener {
 
     private lateinit var recyclerAdapter: NewRecyclerAdapter
     private val viewModel: MainViewModel by viewModels()
@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() , OnClickListener, OnArticleLikedListen
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when(item.itemId) {
+        when (item.itemId) {
             R.id.search -> {
                 val searchView = item.actionView as SearchView
                 searchView.queryHint = resources.getString(R.string.search)
@@ -56,23 +56,24 @@ class MainActivity : AppCompatActivity() , OnClickListener, OnArticleLikedListen
             }
             R.id.like -> {
                 if (showingFav) {
-                item.setIcon(R.drawable.like)
+                    item.setIcon(R.drawable.like)
                     viewModel.setFilter("")
                     showingFav = false
-                }
-                else {
+                } else {
                     showingFav = true
                     item.setIcon(R.drawable.liked)
-                    viewModel.getLikedArticles().observe(this,{
-                        if (showingFav){
-                        recyclerAdapter.setDataList(it)
-                        recyclerAdapter.notifyDataSetChanged()}
+                    viewModel.getLikedArticles().observe(this, {
+                        if (showingFav) {
+                            recyclerAdapter.setDataList(it)
+                            recyclerAdapter.notifyDataSetChanged()
+                        }
                     })
                 }
             }
         }
         return true
     }
+
     private fun initRecyclerView() {
         recycler_view.layoutManager = LinearLayoutManager(this)
         recyclerAdapter = NewRecyclerAdapter()

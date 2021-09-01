@@ -36,7 +36,7 @@ class NewRecyclerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
-            R.layout.article_item -> ArticleItemViewHolder.create(parent, listener,likeListener)
+            R.layout.article_item -> ArticleItemViewHolder.create(parent, listener, likeListener)
             R.layout.networkstate_item -> NetworkStateViewHolder.create(parent)
             else -> throw IllegalArgumentException("Unknown view type")
         }
@@ -87,13 +87,14 @@ class NewRecyclerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                     .placeholder(R.drawable.placeholder)
                     .into(itemView.image_view)
             itemView.description.text = article.description
-            if (article.publishedAt!=null) {
+            if (article.publishedAt != null) {
                 itemView.date.text = article.publishedAt.replace("T", itemView.context.resources.getString(R.string.at)).replace("Z", "")
             }
             itemView.source.text = article.source?.name
             itemView.setOnClickListener {
                 listener.onArticleCLicked(article)
             }
+            if (article.fav == 0) itemView.like.setImageResource(R.drawable.like) else itemView.like.setImageResource(R.drawable.liked)
             itemView.like.setOnClickListener {
                 likeListener.onArticleLiked(article)
                 if (article.fav == 0) {
@@ -110,7 +111,7 @@ class NewRecyclerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             fun create(parent: ViewGroup, listener: OnClickListener, likeListenr: OnArticleLikedListener): ArticleItemViewHolder {
                 val layoutInflater = LayoutInflater.from(parent.context)
                 val view = layoutInflater.inflate(R.layout.article_item, parent, false)
-                return ArticleItemViewHolder(view, listener,likeListenr)
+                return ArticleItemViewHolder(view, listener, likeListenr)
             }
         }
     }

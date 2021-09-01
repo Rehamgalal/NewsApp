@@ -7,7 +7,7 @@ import com.example.newsapp.di.DaggerAppComponent
 
 class NewsApp : Application() {
 
-    private lateinit var  appComponent:AppComponent
+    private lateinit var appComponent: AppComponent
 
     override fun onCreate() {
         super.onCreate()
@@ -15,7 +15,7 @@ class NewsApp : Application() {
         appComponent = DaggerAppComponent.builder().appModule(AppModule(this)).build()
     }
 
-    fun getAppComponent():AppComponent{
+    fun getAppComponent(): AppComponent {
         return appComponent
     }
 }

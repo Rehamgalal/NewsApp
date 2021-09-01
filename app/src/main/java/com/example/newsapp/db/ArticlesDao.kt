@@ -16,10 +16,10 @@ interface ArticlesDao {
     fun insert(articleItem: ArticleEntity)
 
     @Query("SELECT * FROM article ORDER BY id")
-    fun allArticlesEntities():List<ArticleEntity>
+    fun allArticlesEntities(): List<ArticleEntity>
 
     @Query("SELECT * FROM article WHERE  fav = 1  ORDER BY publishedAt")
-    fun favArticlesEntities():LiveData<List<ArticleEntity>>
+    fun favArticlesEntities(): LiveData<List<ArticleEntity>>
 
     @Query("SELECT COUNT(*) FROM article")
     fun getCount(): Int

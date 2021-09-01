@@ -1,7 +1,6 @@
 package com.example.newsapp.di
 
 import android.app.Application
-import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import com.example.newsapp.api.NewsApi
@@ -22,52 +21,53 @@ class AppModule(val application: Application) {
 
     @Singleton
     @Provides
-    fun getRetrofitInstance(okHttpClient: OkHttpClient):Retrofit {
+    fun getRetrofitInstance(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(Constants.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-            .client(okHttpClient)
-            .build()
+                .baseUrl(Constants.BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .client(okHttpClient)
+                .build()
     }
 
     @Singleton
     @Provides
-    fun provideOKHttpClient():OkHttpClient {
+    fun provideOKHttpClient(): OkHttpClient {
         val requestInterceptor = Interceptor { chain ->
             val url = chain.request()
-                .url
-                .newBuilder()
-                .addQueryParameter("apiKey", Constants.API_KEY)
-                .build()
+                    .url
+                    .newBuilder()
+                    .addQueryParameter("apiKey", Constants.API_KEY)
+                    .build()
             val request = chain.request()
-                .newBuilder()
-                .url(url)
-                .build()
+                    .newBuilder()
+                    .url(url)
+                    .build()
             return@Interceptor chain.proceed(request)
         }
         return OkHttpClient.Builder()
-            .addInterceptor(requestInterceptor)
-            .connectTimeout(60, TimeUnit.SECONDS)
-            .build()
+                .addInterceptor(requestInterceptor)
+                .connectTimeout(60, TimeUnit.SECONDS)
+                .build()
     }
 
     @Singleton
     @Provides
-    fun getRetrofitService(retrofit: Retrofit):NewsApi {
+    fun getRetrofitService(retrofit: Retrofit): NewsApi {
         return retrofit.create(NewsApi::class.java)
     }
 
 
     @Singleton
     @Provides
-    fun getSharedPrefrences():SharedPreferences{
+    fun getSharedPrefrences(): SharedPreferences {
         return application.getSharedPreferences("userSelection", MODE_PRIVATE)
     }
 
     @Singleton
     @Provides
     fun providesArticlesDatabase(): ArticlesDatabase {
-       return ArticlesDatabase.buildDatabase(application.applicationContext)}
+        return ArticlesDatabase.buildDatabase(application.applicationContext)
+    }
 
 }

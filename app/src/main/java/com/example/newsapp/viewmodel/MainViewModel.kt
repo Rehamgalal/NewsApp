@@ -15,7 +15,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
-class MainViewModel(@NonNull application: Application)  : AndroidViewModel(application) {
+class MainViewModel(@NonNull application: Application) : AndroidViewModel(application) {
 
     private var searchResult: LiveData<List<ArticleEntity>>
     private var searchKey: MutableLiveData<String> = MutableLiveData()
@@ -93,8 +93,9 @@ class MainViewModel(@NonNull application: Application)  : AndroidViewModel(appli
     }
 
     fun getLikedArticles(): LiveData<List<ArticleEntity>> {
-       return dataBase.articlesDao().favArticlesEntities()
+        return dataBase.articlesDao().favArticlesEntities()
     }
+
     override fun onCleared() {
         super.onCleared()
         compositeDisposable.dispose()

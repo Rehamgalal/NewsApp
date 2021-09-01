@@ -1,6 +1,5 @@
 package com.example.newsapp.di
 
-import android.app.Application
 import com.example.newsapp.ui.MainActivity
 import com.example.newsapp.ui.OnboardingActivity
 import com.example.newsapp.viewmodel.MainViewModel
