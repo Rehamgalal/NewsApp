@@ -65,7 +65,7 @@ class MainViewModel(@NonNull application: Application) : AndroidViewModel(applic
                 }.subscribeOn(Schedulers.io())
                         .subscribe(
                                 {
-                                    liveDataList.postValue(it)
+                                    liveDataList.postValue(dataBase.articlesDao().allArticlesEntities())
                                     networkState.postValue(NetworkState.LOADED)
                                 }, {
                             networkState.postValue(NetworkState.error(it.message))
