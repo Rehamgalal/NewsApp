@@ -3,9 +3,11 @@ package com.example.newsapp.ui
 import com.example.newsapp.adapters.NewRecyclerAdapter
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.Menu
-import android.view.MenuItem
 import android.view.View
+import android.widget.Button
+import android.widget.LinearLayout
 import androidx.activity.viewModels
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.isVisible
@@ -32,47 +34,52 @@ class MainActivity : AppCompatActivity(), OnClickListener, OnArticleLikedListene
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu, menu)
-
-        return super.onCreateOptionsMenu(menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.search -> {
-                val searchView = item.actionView as SearchView
-                searchView.queryHint = resources.getString(R.string.search)
-                searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-                    override fun onQueryTextSubmit(query: String?): Boolean {
-                        viewModel.setFilter(query)
-                        return false
-                    }
-
-                    override fun onQueryTextChange(newText: String?): Boolean {
-                        viewModel.setFilter(newText)
-                        return false
-                    }
-
-                })
-            }
-            R.id.like -> {
-                if (showingFav) {
-                    item.setIcon(R.drawable.like)
-                    viewModel.setFilter("")
-                    showingFav = false
-                } else {
-                    showingFav = true
-                    item.setIcon(R.drawable.liked)
-                    viewModel.getLikedArticles().observe(this, {
-                        if (showingFav) {
-                            recyclerAdapter.setDataList(it)
-                            recyclerAdapter.notifyDataSetChanged()
-                        }
-                    })
-                }
-            }
+        val  searchItem = menu?.findItem(R.id.search)
+        val tv =  TypedValue()
+        var actionBarHeight = 0
+        if (theme.resolveAttribute(android.R.attr.actionBarSize, tv, true))
+        {
+            actionBarHeight = TypedValue.complexToDimensionPixelSize(tv.data, resources.displayMetrics)
         }
+        val searchView =  searchItem?.actionView as SearchView
+        val params =  LinearLayout.LayoutParams(actionBarHeight*2/3, actionBarHeight *2/3)
+        params.marginEnd = 20
+        val button =  Button(this)
+        button.setBackgroundResource(R.drawable.like)
+        (searchView.getChildAt(0) as LinearLayout).addView(button,params)
+        searchView.queryHint = resources.getString(R.string.search)
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                viewModel.setFilter(query)
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                viewModel.setFilter(newText)
+                return false
+            }
+
+        })
+        button.setOnClickListener {
+        if (showingFav) {
+            button.setBackgroundResource(R.drawable.like)
+            viewModel.setFilter("")
+            showingFav = false
+        } else {
+            showingFav = true
+            button.setBackgroundResource(R.drawable.liked)
+            viewModel.getLikedArticles().observe(this, {
+                if (showingFav) {
+                    recyclerAdapter.setDataList(it)
+                    recyclerAdapter.notifyDataSetChanged()
+                }
+            })
+        }}
+
         return true
     }
+
+
 
     private fun initRecyclerView() {
         recycler_view.layoutManager = LinearLayoutManager(this)
