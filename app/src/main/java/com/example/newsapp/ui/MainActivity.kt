@@ -11,6 +11,7 @@ import android.widget.LinearLayout
 import androidx.activity.viewModels
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.isVisible
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.newsapp.R
 import com.example.newsapp.db.ArticleEntity
@@ -50,12 +51,16 @@ class MainActivity : AppCompatActivity(), OnClickListener, OnArticleLikedListene
         searchView.queryHint = resources.getString(R.string.search)
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-                viewModel.setFilter(query)
+                viewModel.searchArticle(query!!).observe(this@MainActivity, {
+                    recyclerAdapter.setDataList(it)
+                    recyclerAdapter.notifyDataSetChanged()  })
                 return false
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                viewModel.setFilter(newText)
+                if (newText.equals("")) {
+                    viewModel.setFilter("")
+                }
                 return false
             }
 

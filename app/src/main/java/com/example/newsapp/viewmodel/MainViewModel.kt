@@ -77,6 +77,10 @@ class MainViewModel(@NonNull application: Application) : AndroidViewModel(applic
         return liveDataList
     }
 
+    fun searchArticle(word:String) : LiveData<List<ArticleEntity>> {
+        return dataBase.articlesDao().searchArticles(word)
+    }
+
     fun setFilter(filter: String?) {
         if (filter == null) searchKey.value = "" else searchKey.value = filter
     }

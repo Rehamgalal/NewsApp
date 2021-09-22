@@ -15,12 +15,17 @@ interface ArticlesDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(articleItem: ArticleEntity)
 
-    @Query("SELECT * FROM article ORDER BY id")
+    @Query("SELECT * FROM article ORDER BY publishedAt")
     fun allArticlesEntities(): List<ArticleEntity>
+
+    @Query("SELECT * FROM article WHERE  title LIKE '%' || :word  || '%'  ORDER BY publishedAt")
+    fun searchArticles(word:String): LiveData<List<ArticleEntity>>
 
     @Query("SELECT * FROM article WHERE  fav = 1  ORDER BY publishedAt")
     fun favArticlesEntities(): LiveData<List<ArticleEntity>>
 
     @Query("SELECT COUNT(*) FROM article")
     fun getCount(): Int
+
+
 }
