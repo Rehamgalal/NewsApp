@@ -9,7 +9,7 @@ import androidx.room.Query
 @Dao
 interface ArticlesDao {
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insert(articleList: List<ArticleEntity>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
